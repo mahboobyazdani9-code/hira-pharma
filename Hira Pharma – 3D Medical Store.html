@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hira Pharma – 3D Medical Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Instrument+Serif&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;
+--bg:#12101f;--card:#2b2370b3;--line:#ffffff1f;--text:#fff;--mute:#c4c2ea;--acc:#b4b4f5}
+html{scroll-padding-top:90px;scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 700px at 85% 8%,#4a3fa0aa,transparent 65%),linear-gradient(160deg,#2f2478,#1b1440 55%,#12101f) fixed,var(--bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+button{font:inherit;cursor:pointer}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:#1b144099;backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.bar{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-weight:800;font-size:20px}.logo b{color:var(--acc)}
+nav{display:none;gap:4px}nav a{color:var(--mute);text-decoration:none;font-size:12px;font-weight:600;padding:7px 12px;border-radius:99px}nav a:hover{background:#27272a;color:#fff}
+@media(min-width:820px){nav{display:flex}}
+.btn{border:1px solid var(--line);background:#111;color:var(--text);padding:10px 18px;border-radius:99px;font-weight:600;font-size:12px}
+.btn.pri{background:#111;border:1px solid #ffffff22;color:#fff;box-shadow:0 8px 20px #0006}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.hero{display:grid;gap:20px;padding:24px 0 30px}
+@media(min-width:900px){.hero{grid-template-columns:5fr 7fr;align-items:center;min-height:80vh}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(10px)}
+.stack>*+*{margin-top:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mute{color:var(--mute);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:800;border:1px solid}
+.badge i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.ok{color:#34d399;background:#022c22cc;border-color:#10b98180}.low{color:#fbbf24;background:#2d1b00cc;border-color:#f59e0b80}.out{color:#fb7185;background:#2d0510cc;border-color:#f43f5e80}
+.meter{height:8px;background:#18181b;border-radius:9px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+#hfill{height:100%;border-radius:9px;transition:width .5s}
+h1{margin:4px 0 0;font-size:clamp(30px,4.5vw,50px);font-weight:800;line-height:1.1}
+.price{font-size:30px;font-weight:800}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:#18181b}
+.qty button{width:36px;height:40px;border:0;background:none;color:var(--text);font-size:18px}.qty span{width:30px;text-align:center;font-weight:700}
+.cta{flex:1;padding:14px;border:0;border-radius:99px;color:#fff;font-weight:600;background:#111;box-shadow:0 8px 24px #0007}
+.cta.low{background:linear-gradient(90deg,#d97706,#ea580c);color:#fff;border:0}
+.cta:disabled{background:#27272a;color:#71717a;cursor:not-allowed}
+#view{height:460px;border-radius:24px;overflow:hidden;border:1px solid var(--line);background:var(--card);cursor:grab}
+@media(min-width:900px){#view{height:580px}}
+section.cat{margin-top:50px}
+.cat h2{margin:4px 0 0;font-size:24px}.cat .tag{color:var(--acc);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.cat header{position:static;background:none;backdrop-filter:none;border-bottom:1px solid var(--line);padding:0 0 12px}
+.grid{display:grid;gap:18px;margin-top:18px}
+@media(min-width:760px){.grid{grid-template-columns:repeat(3,1fr)}}
+.pc{display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+.pc h3{margin:10px 0 4px;font-size:16px}
+.pc .mute{font-size:12px}
+.pc .foot{border-top:1px solid var(--line);padding-top:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.two .btn{padding:8px}
+.drawer{position:fixed;inset:0;z-index:50;display:none}.drawer.open{display:block}
+.shade{position:absolute;inset:0;background:#000000bf}
+.panel{position:absolute;top:0;right:0;bottom:0;width:min(420px,100%);background:#1b1440;border-left:1px solid var(--line);padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));overflow:auto}
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}
+.box{position:relative;background:#1b1440;border:1px solid var(--line);border-radius:20px;padding:20px;width:min(520px,100%);max-height:90vh;overflow:auto}
+input,textarea{width:100%;padding:10px 12px;border:1px solid #3f3f46;border-radius:10px;background:#18181b;color:var(--text);font:inherit;font-size:13px;margin-top:8px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;margin-top:8px;font-size:13px;background:#18181b}
+#rxbox{display:none;background:#2d1b0099;color:#fbbf24;border:1px solid #f59e0b66;border-radius:12px;padding:12px;margin-top:14px;font-size:12px}
+.n{width:70px;margin:0}
+section.cat{margin-top:56px}.btn{min-height:40px}
+.pc h3{min-height:2.5em;font-size:16px;line-height:1.25;font-weight:600}.pc h3+.mute{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#boot{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:var(--bg);color:var(--mute);font-size:13px;transition:opacity .4s;animation:bootout .01s 5s forwards}#boot.done{opacity:0;pointer-events:none}@keyframes bootout{to{opacity:0;visibility:hidden}}
+.spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:rot .8s linear infinite}@keyframes rot{to{transform:rotate(360deg)}}
+.sticky{display:none}
+@media(max-width:760px){.sticky{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:35;gap:10px;align-items:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:#0a0a0acc;backdrop-filter:blur(12px);border-top:1px solid var(--line)}.sticky .cta{flex:none;padding:12px 22px}body{padding-bottom:84px}body #toasts{bottom:calc(92px + env(safe-area-inset-bottom,0px))}}
+html[data-theme=light] .sticky{background:#fbfaf6ee}
+html[data-theme=black]{--bg:#000;--card:#0d0d0dcc;--line:#ffffff1f;--text:#fff;--mute:#a3a3a3;--acc:#fff;color-scheme:dark}
+html[data-theme=black] body{background:#000}
+html[data-theme=black] #bg{opacity:.55}
+html[data-theme=black] header{background:#000000b3}html[data-theme=black] .cat header{background:none}
+html[data-theme=black] nav a:hover{background:#1a1a1a;color:#fff}
+html[data-theme=black] .panel,html[data-theme=black] .box{background:#0a0a0a}
+html[data-theme=black] .btn,html[data-theme=black] .qty,html[data-theme=black] .item,html[data-theme=black] input,html[data-theme=black] textarea,html[data-theme=black] select{background:#0d0d0d;border-color:#ffffff26}
+html[data-theme=black] .btn.pri,html[data-theme=black] .cta{background:#fff;color:#000;border-color:#fff;box-shadow:none}
+html[data-theme=black] .chips button.on{background:#fff;color:#000}
+html[data-theme=black] .cta.low{background:#f59e0b;color:#000}
+html[data-theme=black] .cta:disabled{background:#1a1a1a;color:#666}
+html[data-theme=black] footer.site,html[data-theme=black] .newform{background:#000000b3}
+html[data-theme=black] details,html[data-theme=black] .toast{background:#0d0d0d}
+html[data-theme=black] .meter{background:#1a1a1a}
+html[data-theme=light]{--bg:#f4f1ea;--card:#ffffffcc;--line:#00000018;--text:#111;--mute:#5f5f58;--acc:#e8541b;color-scheme:light}
+html[data-theme=light] body{background:#f4f1ea}
+html[data-theme=light] #bg{filter:hue-rotate(150deg);opacity:.55}
+html[data-theme=light] header{background:#f4f1eacc}html[data-theme=light] .cat header{background:none}
+html[data-theme=light] nav a:hover{background:#0000000d;color:#111}
+html[data-theme=light] .btn,html[data-theme=light] .qty,html[data-theme=light] .item,html[data-theme=light] input,html[data-theme=light] textarea,html[data-theme=light] select{background:#fff;color:#111;border-color:#00000022}
+html[data-theme=light] .qty button{color:#111}
+html[data-theme=light] .btn.pri,html[data-theme=light] .cta{background:#111;color:#fff;border-color:#111;box-shadow:none}
+html[data-theme=light] .chips button.on{background:#111;color:#fff}
+html[data-theme=light] .cta.low{background:#e8541b}
+html[data-theme=light] .cta:disabled{background:#e5e2d9;color:#8a8a82}
+html[data-theme=light] .panel,html[data-theme=light] .box{background:#fbfaf6;color:#111}
+html[data-theme=light] .meter{background:#0000000f;border-color:#0000000f}
+html[data-theme=light] .badge.ok{color:#047857;background:#ecfdf5;border-color:#6ee7b7}
+html[data-theme=light] .badge.low{color:#b45309;background:#fffbeb;border-color:#fcd34d}
+html[data-theme=light] .badge.out{color:#be123c;background:#fff1f2;border-color:#fda4af}
+html[data-theme=light] .toast{background:#111;color:#fff}
+html[data-theme=light] footer.site,html[data-theme=light] .newform{background:#ffffff99}
+html[data-theme=light] details{background:#fff}
+html[data-theme=light] #rxbox{background:#fff4e5;color:#92400e}
+html[data-theme=light] .bh,html[data-theme=light] h1,html[data-theme=light] .cat h2,html[data-theme=light] .logo{font-family:"Instrument Serif",Georgia,serif;font-weight:400;letter-spacing:-.01em}
+html[data-theme=light] .bh{font-size:clamp(46px,9vw,100px);line-height:.95}html[data-theme=light] .logo{font-size:28px}
+.qrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}
+.qi{background:#fff;color:#12101f;border-radius:14px;padding:12px;text-align:center;break-inside:avoid}.qi .qn{font-size:12px;font-weight:700;margin-top:8px;line-height:1.25}.qi .qp{font-size:12px;color:#52525b;margin-top:2px}
+#qr-one canvas,#qr-one img{display:block}
+@media print{body{background:#fff!important}body>*:not(.modal.open){display:none!important}.modal.open{position:static;display:block}.modal.open .shade,.modal.open .btn{display:none}.modal.open .box{background:#fff!important;color:#000!important;border:0;max-height:none;max-width:none;width:auto}.modal.open .mute{color:#444!important}}
+.sh{margin:20px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc)}.box label.l{display:block;margin-top:10px;font-size:12px;color:var(--mute)}.box label.l input,.box label.l textarea{margin-top:4px}
+.sw{display:flex;gap:10px;align-items:center;font-size:13px;margin-top:10px}.sw input{width:auto;margin:0}
+a.btn{display:inline-block;text-decoration:none}.btn.big{padding:14px 26px;font-size:14px}
+.banner{max-width:680px;padding:70px 0 40px}.banner .tag{color:var(--acc);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+.bh{margin:10px 0 14px;font-size:clamp(38px,7vw,74px);font-weight:800;line-height:1.05}.banner p{color:var(--mute);font-size:16px;max-width:520px;margin:0 0 24px}
+.stats{display:flex;gap:28px;margin-top:30px;flex-wrap:wrap}.stats b{display:block;font-size:22px}.stats span{color:var(--mute);font-size:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chips button.on{background:#fff;color:#111}
+footer.site{border-top:1px solid var(--line);background:#12101f99;margin-top:30px}
+footer .cols{max-width:1200px;margin:0 auto;padding:34px 20px;display:grid;gap:24px}@media(min-width:760px){footer .cols{grid-template-columns:2fr 1fr 1fr}}
+footer h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc)}footer p{margin:4px 0;color:var(--mute);font-size:13px}
+details{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;background:var(--card)}summary{cursor:pointer;font-weight:600}details p{color:var(--mute);font-size:13px;margin:8px 0 0}
+.rv{position:relative}.rv .sm{position:absolute;top:10px;right:12px;font-size:10px;color:#fbbf24;border:1px solid #f59e0b66;border-radius:99px;padding:2px 8px}
+.newform{display:none;background:#2b237099;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}.newform.open{display:block}
+.newform .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.newform .g3 input,.newform select{margin-top:8px;width:100%}
+.newform label{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}.newform label input{width:auto;margin:0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:40px}
+.toolbar input[type=search]{flex:1;min-width:180px;margin:0}
+select{padding:10px 12px;border:1px solid #3f3f46;border-radius:10px;background:#18181b;color:var(--text);font:inherit;font-size:13px}
+.item .qty button{width:26px;height:28px}.item .qty span{width:22px;font-size:13px}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:90;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:#18181b;border:1px solid #22d3ee66;color:var(--text);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 30px #000a;animation:tin .25s}
+.toast.warn{border-color:#f59e0b99;color:#fbbf24}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="boot"><div class="spin"></div><div>Loading store…</div></div>
+<canvas id="bg"></canvas>
+<header><div class="bar">
+  <div class="logo">HIRA<b>PHARMA</b></div>
+  <nav><a href="#syrups">Syrups & Liquids</a><a href="#tablets">Tablets & Capsules</a><a href="#general">Creams, Oils & Powders</a></nav>
+  <div class="row"><button class="btn" onclick="toggleTheme()" aria-label="Switch theme">Theme</button><button class="btn" onclick="openSettings()" aria-label="Settings">⚙ Settings</button><button class="btn" onclick="openInv()">Manage stock</button><button class="btn pri" onclick="cartOpen(true)">Bag (<span id="cnt">0</span>)</button></div>
+</div></header>
+
+<div class="wrap">
+<div class="banner"><span class="tag">Your trusted online pharmacy</span><h1 class="bh">Healthcare,<br>delivered in 3D.</h1><p>Inspect every medicine in interactive 3D, check live stock, and order from home.</p><div class="row"><a class="btn pri big" href="#shop">Shop now</a><a class="btn big" href="#inspector">Inspect in 3D</a></div><div class="stats"><div><b>3D</b><span>Product viewer</span></div><div><b>Live</b><span>Stock status</span></div><div><b id="fstat">₹1,500+</b><span>Free delivery</span></div></div></div>
+<div class="hero" id="inspector">
+  <div class="stack">
+    <div class="row"><span id="hbadge" class="badge"><i></i><span id="hbtxt"></span></span><span id="hrx" class="mute"></span></div>
+    <div class="card"><div class="row" style="justify-content:space-between"><span class="mute">Shelf stock capacity</span><b id="hunits" style="font-size:12px"></b></div><div class="meter"><div id="hfill"></div></div></div>
+    <div><span id="hcat" class="mute" style="color:var(--acc);font-weight:800;text-transform:uppercase;font-size:11px"></span><h1 id="htitle"></h1><div id="hsub" class="mute" style="margin-top:6px"></div></div>
+    <div class="card"><div id="hprice" class="price"></div><p id="hdesc" class="mute" style="margin:6px 0 0"></p><p class="mute" style="margin:8px 0 0;font-size:11px">Always consult your doctor or pharmacist before using any medicine.</p><p id="hrxnote" class="mute" style="display:none;margin:8px 0 0;font-size:12px;color:#fbbf24">Prescription medicine: sold only against a valid doctor’s prescription. You upload it at checkout and our pharmacist checks it before dispatch.</p></div>
+    <div class="row"><div class="qty"><button onclick="hq(-1)">−</button><span id="hqty">1</span><button onclick="hq(1)">+</button></div><button id="hadd" class="cta" onclick="add(active,qty)"></button></div>
+    <button class="btn" onclick="showQR(active)">QR code</button> <button class="btn" id="hrestock" onclick="restock(active)">↻ Restock this item to full</button>
+  </div>
+  <div id="view"></div>
+</div>
+
+<div class="toolbar" id="shop" role="search"><input id="q" type="search" placeholder="Search medicines…" aria-label="Search medicines" oninput="cards()"><select id="sort" aria-label="Sort medicines" onchange="cards()"><option value="">Sort: featured</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select><label class="mute"><input id="instock" type="checkbox" onchange="cards()" style="width:auto;margin:0 6px 0 0">In stock only</label><button class="btn" onclick="showAllQR()">All QR codes</button></div>
+<div class="chips" id="chips"><button class="btn on" data-f="all">All</button><button class="btn" data-f="syrups">Syrups</button><button class="btn" data-f="tablets">Tablets & capsules</button><button class="btn" data-f="general">Creams & oils</button><button class="btn" data-f="rx">Rx only</button><button class="btn" data-f="low">Low stock</button></div>
+<div id="empty" class="mute" style="display:none;text-align:center;padding:40px 0"><div style="font-size:36px">🔍</div>No medicines match your search or filters.<br><button class="btn" style="margin-top:12px" onclick="clearF()">Clear filters</button></div>
+<section id="syrups" class="cat"><header><span class="tag">Oral suspensions</span><h2>Syrups & liquid medications</h2></header><div class="grid" id="g-syrups"></div></section>
+<section id="tablets" class="cat"><header><span class="tag">Solid dosage forms</span><h2>Tablets & capsules</h2></header><div class="grid" id="g-tablets"></div></section>
+<section id="general" class="cat" style="margin-bottom:50px"><header><span class="tag">Topicals & wellness</span><h2>General care: creams, powders & oils</h2></header><div class="grid" id="g-general"></div></section>
+<section class="cat"><header><span class="tag">Customer reviews</span><h2>What customers say</h2></header>
+<div class="grid"><div class="card rv"><span class="sm">Sample</span>★★★★★<p class="mute">Replace this with a real customer review.</p><b>Customer name</b></div><div class="card rv"><span class="sm">Sample</span>★★★★★<p class="mute">Replace this with a real customer review.</p><b>Customer name</b></div><div class="card rv"><span class="sm">Sample</span>★★★★☆<p class="mute">Replace this with a real customer review.</p><b>Customer name</b></div></div></section>
+<section class="cat" style="margin-bottom:50px"><header><span class="tag">FAQ</span><h2>Common questions</h2></header>
+<details><summary>Do I need a prescription?</summary><p>Medicines marked Rx need a valid doctor’s prescription. You upload it at checkout, and over-the-counter items don’t need one.</p></details>
+<details><summary>How fast is delivery?</summary><p>Enter your pincode in the bag to see the delivery time and fee for your area. Orders above <span class="fv">₹1,500</span> get free delivery.</p></details>
+<details><summary>Can I pay online?</summary><p>This store is a demo, so payments aren’t switched on yet and no order is actually delivered.</p></details>
+<details><summary>Are the stock numbers live?</summary><p>Stock updates as orders are placed and as the pharmacist restocks. Low-stock items show an amber badge.</p></details></section>
+</div>
+
+<footer class="site"><div class="cols"><div><div class="logo">HIRA<b>PHARMA</b></div><p>Your neighbourhood pharmacy, now with 3D product views.</p><p>Medicines should be used as advised by a qualified doctor.</p><a id="wa" class="btn pri" style="margin-top:10px" target="_blank" rel="noopener" href="https://wa.me/910000000000?text=Hi%20Hira%20Pharma%2C%20I%20want%20to%20order%20medicines">Order on WhatsApp</a></div><div><h4>Visit us</h4><p id="fa"></p><p id="fp"></p><p id="fl"></p></div><div><h4>Opening hours</h4><p id="fh"></p></div></div></footer>
+<div id="drawer" class="drawer"><div class="shade" onclick="cartOpen(false)"></div><div class="panel">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">Medical checkout bag</h2><button class="btn" onclick="cartOpen(false)">✕</button></div>
+  <div id="items"></div>
+  <div id="rxbox"><b>Doctor’s prescription (Rx) required.</b> Prescription medicines can only be sold against a valid doctor’s prescription, which our pharmacist checks before dispatch. Upload it (.pdf/.jpg):<input type="file" id="rxfile"></div>
+  <h3 class="mute" style="margin:18px 0 0;text-transform:uppercase;font-size:11px">Patient & delivery information</h3>
+  <input id="oname" placeholder="Full patient name"><input id="ophone" type="tel" placeholder="Contact phone"><textarea id="oaddr" rows="2" placeholder="Complete delivery address"></textarea>
+  <div id="fd" class="card" style="margin-top:14px"><div class="mute" id="fdtxt"></div><div class="meter"><div id="fdbar" style="height:100%;background:var(--acc);width:0;border-radius:9px;transition:width .4s"></div></div></div>
+  <div class="row" style="margin-top:12px;flex-wrap:nowrap"><input id="cpn" placeholder="Coupon code (try HIRA10)" style="margin:0" aria-label="Coupon code"><button class="btn" onclick="applyCoupon()">Apply</button></div>
+  <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="pin" inputmode="numeric" maxlength="6" placeholder="Delivery pincode" style="margin:0" aria-label="Delivery pincode"><button class="btn" onclick="checkPin()">Check</button></div><div id="pinmsg" class="mute" style="margin-top:6px"></div><div id="sum" class="mute" style="margin-top:12px"></div>
+  <div class="row" style="justify-content:space-between;margin:18px 0 10px"><b>Order total</b><b id="total" style="font-size:22px"></b></div>
+  <button id="place" class="cta" style="width:100%" onclick="placeOrder()">Authorize & place order</button>
+</div></div>
+
+<div id="inv" class="modal"><div class="shade" onclick="closeM('inv')"></div><div class="box">
+  <div class="row" style="justify-content:space-between"><h3 style="margin:0">Pharmacist live inventory</h3><button class="btn" onclick="closeM('inv')">✕</button></div>
+  <div class="row" style="justify-content:space-between;margin:12px 0"><p class="mute" style="margin:0">Changes are saved on this device.</p><button class="btn pri" onclick="restockAll()">↻ Restock all to full</button></div><button class="btn pri" onclick="$('newform').classList.toggle('open')" style="margin-bottom:10px">＋ Add new medicine</button>
+  <div id="newform" class="newform">
+    <input id="nm-name" placeholder="Medicine name *" maxlength="60">
+    <input id="nm-sub" placeholder="Short subtitle (e.g. 10 tablets | 500mg)" maxlength="80">
+    <div class="g3"><input id="nm-price" type="number" min="0" step="0.01" placeholder="Price (₹) *"><input id="nm-stock" type="number" min="0" placeholder="Stock units"><input id="nm-max" type="number" min="1" placeholder="Max stock *"></div>
+    <div class="g3" style="grid-template-columns:1fr 1fr"><select id="nm-cat" aria-label="Category"><option value="syrups">Syrups & Liquids</option><option value="tablets">Tablets & Capsules</option><option value="general">Creams, Oils & Powders</option></select><select id="nm-model" aria-label="3D model"><option value="syrup">3D: Syrup bottle</option><option value="capsule">3D: Capsule</option><option value="pack">3D: Tablet blister pack</option><option value="cream">3D: Cream tube</option><option value="oil">3D: Oil bottle</option><option value="powder">3D: Powder jar</option></select></div>
+    <textarea id="nm-desc" rows="2" placeholder="Description" maxlength="200"></textarea>
+    <label><input id="nm-rx" type="checkbox"> Prescription (Rx) required</label>
+    <div class="row" style="margin-top:12px"><button class="btn pri" onclick="addMedicine()">Save medicine</button><button class="btn" onclick="$('newform').classList.remove('open')">Cancel</button></div>
+  </div>
+  <div id="invlist"></div>
+</div></div>
+
+<div id="set" class="modal"><div class="shade" onclick="closeM('set')"></div><div class="box">
+  <div class="row" style="justify-content:space-between"><h3 style="margin:0">Store settings</h3><button class="btn" onclick="closeM('set')" aria-label="Close">✕</button></div>
+  <h4 class="sh">Shop details</h4>
+  <label class="l">Shop name<input id="s-name" maxlength="40"></label><label class="l">Phone<input id="s-phone" maxlength="20"></label><label class="l">Address<input id="s-addr" maxlength="120"></label><label class="l">Opening hours<input id="s-hours" maxlength="80"></label>
+  <label class="l">WhatsApp number (with country code, e.g. 919876543210)<input id="s-wa" inputmode="numeric" maxlength="15"></label>
+  <h4 class="sh">Licence & tax</h4>
+  <label class="l">Drug licence number<input id="s-lic" maxlength="40"></label><label class="l">Pharmacist name & registration no.<input id="s-pharm" maxlength="60"></label><label class="l">GSTIN<input id="s-gstin" maxlength="15"></label><label class="l">GST included in prices (%)<input id="s-gst" type="number" min="0" max="28"></label>
+  <h4 class="sh">Store rules</h4>
+  <label class="l">Free delivery above (₹)<input id="s-free" type="number" min="0"></label><label class="l">Low-stock alert at (units)<input id="s-low" type="number" min="1"></label>
+  <h4 class="sh">Display</h4>
+  <label class="l">Theme<select id="s-theme"><option value="purple">Purple 3D</option><option value="light">Minimal light</option><option value="black">Pure black</option></select></label>
+  <label class="sw"><input id="s-bg" type="checkbox"> Floating 3D background</label><label class="sw"><input id="s-motion" type="checkbox"> Animations</label><label class="sw"><input id="s-spin" type="checkbox"> Auto-rotate product</label>
+  <h4 class="sh">Owner access</h4>
+  <label class="l">Owner PIN (4–6 digits). It locks Settings, Manage stock and Restock.<input id="s-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Leave blank to keep current" autocomplete="off"></label>
+  <p class="mute" style="font-size:11px">The PIN only stops casual use. It is checked in the browser, so it is not real security.</p>
+  <div class="row" style="margin-top:16px"><button class="btn pri" onclick="saveSettings()">Save settings</button><button class="btn" onclick="removePin()">Remove PIN</button><button class="btn" style="color:#fb7185" onclick="resetAll()">Reset all data</button></div>
+</div></div>
+<div id="pinm" class="modal"><div class="shade" onclick="closeM('pinm')"></div><div class="box" style="max-width:340px;text-align:center"><h3 style="margin:0">Owner PIN</h3><p class="mute">Enter your PIN to continue.</p><input id="pin-in" type="password" inputmode="numeric" maxlength="6" style="text-align:center" aria-label="Owner PIN" onkeydown="if(event.key==='Enter')tryPin()"><div class="row" style="justify-content:center;margin-top:14px"><button class="btn pri" onclick="tryPin()">Unlock</button><button class="btn" onclick="closeM('pinm')">Cancel</button></div></div></div>
+<div id="qr" class="modal"><div class="shade" onclick="closeM('qr')"></div><div class="box" style="max-width:340px;text-align:center"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Medicine QR code</h3><button class="btn" onclick="closeM('qr')" aria-label="Close">✕</button></div><div id="qr-one" style="background:#fff;padding:14px;border-radius:14px;display:inline-block;margin:14px 0"></div><div><b id="qr-name"></b><div class="mute" id="qr-price"></div></div><p class="mute" style="font-size:11px">Scan to open this medicine in the store.</p><button class="btn pri" onclick="showAllQR()">All QR codes</button></div></div>
+<div id="qrall" class="modal"><div class="shade" onclick="closeM('qrall')"></div><div class="box" style="max-width:860px;width:100%"><div class="row" style="justify-content:space-between"><h3 style="margin:0">QR codes for every medicine</h3><div class="row"><button class="btn pri" onclick="window.print()">Print</button><button class="btn" onclick="closeM('qrall')" aria-label="Close">✕</button></div></div><div class="qrgrid" id="qr-grid"></div></div></div>
+<div id="invoice" class="modal"><div class="shade" onclick="closeM('invoice')"></div><div class="box" style="background:#fff;color:#111;max-width:640px;width:100%"><div class="row" style="justify-content:flex-end"><button class="btn pri" onclick="window.print()">Print</button><button class="btn" style="background:#fff;color:#111" onclick="closeM('invoice')" aria-label="Close">✕</button></div><div id="inv-body"></div></div></div>
+<div id="rec" class="modal"><div class="shade"></div><div class="box" style="text-align:center;max-width:380px">
+  <h3 style="margin:0;color:#34d399">Order placed ✓</h3><p class="mute">Order #<span id="oid"></span> for <b id="rname"></b></p><p>Total: <b id="ramt"></b></p>
+  <p class="mute">Demo store: no payment was taken and nothing will be delivered.</p><button class="btn" onclick="showInvoice()">View invoice</button> <button class="btn pri" onclick="closeM('rec')">Return to dispensary</button>
+</div></div>
+
+<div class="sticky"><div style="flex:1;min-width:0"><div id="sk-name" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div><b id="sk-price"></b></div><button id="sk-add" class="cta" onclick="add(active,1)">Add to bag</button></div>
+<div id="toasts" aria-live="polite"></div>
+<script>
+const $=id=>document.getElementById(id);
+let RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function toast(m,t){const e=document.createElement('div');e.className='toast '+(t||'');e.textContent=m;e.setAttribute('role','status');$('toasts').appendChild(e);setTimeout(()=>e.remove(),2600)}
+const KEY='aura-pharma-v1';
+function save(){try{localStorage.setItem(KEY,JSON.stringify({s:Object.fromEntries(Object.entries(P).map(([k,p])=>[k,p.stock])),c:cart,x:Object.fromEntries(Object.entries(P).filter(([k,p])=>p.custom))}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d)return;
+  Object.entries(d.x||{}).forEach(([k,p])=>{if(p&&typeof p.name==='string'&&p.price>=0&&['syrups','tablets','general'].includes(p.cat)&&B[p.m]){['name','sub','desc','cn'].forEach(f=>p[f]=String(p[f]||'').replace(/[<>]/g,''));p.custom=true;P[k]=p}});Object.entries(d.s||{}).forEach(([k,v])=>{if(P[k]&&Number.isInteger(v)&&v>=0)P[k].stock=v});cart=(d.c||[]).filter(c=>P[c.id]&&c.qty>0)}catch(e){}}
+addEventListener('keydown',e=>{if(e.key==='Escape'){cartOpen(false);closeM('inv');closeM('rec')}});
+const inr=n=>'₹'+Number(n).toLocaleString('en-IN');
+const P={
+ 'syrup-broncho':{cat:'syrups',cn:'Syrups & Liquids',name:'Broncho-Soothe Cough Syrup 200ml',sub:'Dual-action bronchodilator & expectorant',price:1399,stock:16,max:30,rx:false,m:'syrup',desc:'Relief for productive chest coughs and bronchial spasms, with honey and menthol.'},
+ 'syrup-pediatric':{cat:'syrups',cn:'Syrups & Liquids',name:'Pediatric Elixir Paracetamol 120mg',sub:'Gentle fever & pain reducer for kids',price:1080,stock:4,max:25,rx:false,m:'syrup',desc:'Sugar-free strawberry suspension for fever and teething discomfort.'},
+ 'syrup-lactulose':{cat:'syrups',cn:'Syrups & Liquids',name:'Lactulose Colonic Tonic 200ml',sub:'Osmotic laxative & prebiotic regulator',price:1740,stock:0,max:20,rx:true,m:'syrup',desc:'Laxative solution used under medical supervision. Prescription required.'},
+ 'tab-vitacore':{cat:'tablets',cn:'Tablets & Capsules',name:'VitaCore Daily Multivitamin 60s',sub:'Zinc, Vitamin D3 & omega fatty acids',price:2400,stock:22,max:40,rx:false,m:'capsule',desc:'Daily micronutrient complex to support immunity and general health.'},
+ 'tab-ampicillin':{cat:'tablets',cn:'Tablets & Capsules',name:'Bio-Nano Ampicillin Max 500mg',sub:'30 targeted-release capsules',price:3520,stock:5,max:20,rx:true,m:'capsule',desc:'Penicillin-group antibiotic for respiratory and urinary infections. Prescription required.'},
+ 'tab-analgesic':{cat:'tablets',cn:'Tablets & Capsules',name:'Rapid-Release Pain Relief Blister 20s',sub:'Ibuprofen 400mg + Paracetamol 325mg',price:965,stock:19,max:35,rx:false,m:'pack',desc:'Combination pain reliever for migraine, dental pain and muscular inflammation.'},
+ 'gen-cream':{cat:'general',cn:'Creams, Oils & Powders',name:'Derma-Heal Antiseptic Barrier Cream 50g',sub:'Zinc oxide 15% + chlorhexidine',price:1235,stock:14,max:30,rx:false,m:'cream',desc:'Protects minor abrasions, burns and rashes from bacterial contamination.'},
+ 'gen-oil':{cat:'general',cn:'Creams, Oils & Powders',name:'Pure Cold-Pressed Castor Oil 100ml',sub:'Pure extra-virgin formula',price:1495,stock:3,max:15,rx:false,m:'oil',desc:'Topical oil for deep moisturizing and joint massage.'},
+ 'gen-powder':{cat:'general',cn:'Creams, Oils & Powders',name:'Anti-Fungal Clotrimazole Dusting Powder 100g',sub:'Micronized moisture-absorbing formula',price:845,stock:0,max:25,rx:false,m:'powder',desc:'Sweat-absorbing antifungal powder for athlete’s foot and heat rash.'}
+};
+let active='syrup-broncho',qty=1,cart=[];
+const SKEY='hira-settings-v1',S={name:'Hira Pharma',phone:'+91 00000 00000',addr:'Add your shop address in Settings',hours:'Mon–Sat 9:00 am – 9:00 pm · Sun 10:00 am – 2:00 pm',wa:'',free:1500,low:10,lic:'',pharm:'',gstin:'',gst:12,theme:'purple',bg:true,motion:true,spin:true,pinh:''};
+try{Object.assign(S,JSON.parse(localStorage.getItem(SKEY)||'{}'))}catch(e){}
+const hp=s=>{let h=5381;for(const c of 'hira|'+s)h=(h*33)^c.charCodeAt(0);return String(h>>>0)};
+let unlocked=false,pend=null;
+function gate(fn){if(!S.pinh||unlocked)return true;pend=fn;$('pin-in').value='';$('pinm').classList.add('open');setTimeout(()=>$('pin-in').focus(),50);return false}
+function tryPin(){if(hp($('pin-in').value)===S.pinh){unlocked=true;closeM('pinm');const f=pend;pend=null;if(f)f()}else toast('Wrong PIN','warn')}
+function applySettings(){
+  FREE=Math.max(0,+S.free||0);LOW=Math.max(1,+S.low||10);RM=!S.motion||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const w=String(S.name).trim().split(/\s+/);
+  document.querySelectorAll('.logo').forEach(l=>{l.textContent=(w[0]||'').toUpperCase();if(w.length>1){const b=document.createElement('b');b.textContent=w.slice(1).join(' ').toUpperCase();l.appendChild(b)}});
+  document.title=S.name;$('fa').textContent='Shop address: '+S.addr;$('fp').textContent='Phone: '+S.phone;$('fh').textContent=S.hours;$('fl').textContent=[S.lic&&'Drug licence: '+S.lic,S.pharm&&'Pharmacist: '+S.pharm,S.gstin&&'GSTIN: '+S.gstin].filter(Boolean).join(' · ');
+  const num=String(S.wa).replace(/\D/g,''),a=$('wa');a.style.display=num?'':'none';a.href='https://wa.me/'+num+'?text='+encodeURIComponent('Hi '+S.name+', I want to order medicines');
+  $('bg').style.display=S.bg?'':'none';{const t=['light','black'].includes(S.theme)?S.theme:'purple';document.documentElement.dataset.theme=t;setPalette(t)}$('fstat').textContent=inr(FREE)+'+';document.querySelectorAll('.fv').forEach(e=>e.textContent=inr(FREE));
+}
+function openSettings(){
+  if(!gate(openSettings))return;
+  const v={'s-name':S.name,'s-phone':S.phone,'s-addr':S.addr,'s-hours':S.hours,'s-wa':S.wa,'s-free':S.free,'s-low':S.low,'s-lic':S.lic,'s-pharm':S.pharm,'s-gstin':S.gstin,'s-gst':S.gst};
+  Object.entries(v).forEach(([k,x])=>$(k).value=x);$('s-theme').value=S.theme;$('s-bg').checked=S.bg;$('s-motion').checked=S.motion;$('s-spin').checked=S.spin;$('s-pin').value='';
+  $('set').classList.add('open');
+}
+function persistS(){try{localStorage.setItem(SKEY,JSON.stringify(S))}catch(e){}}
+function saveSettings(){
+  const g=i=>$(i).value.replace(/[<>]/g,'').trim();
+  S.name=g('s-name')||'Hira Pharma';S.phone=g('s-phone');S.addr=g('s-addr');S.hours=g('s-hours');S.wa=g('s-wa').replace(/\D/g,'');
+  S.lic=g('s-lic');S.pharm=g('s-pharm');S.gstin=g('s-gstin');S.gst=Math.max(0,Math.min(28,parseFloat($('s-gst').value)||0));
+  S.free=Math.max(0,parseInt($('s-free').value,10)||0);S.low=Math.max(1,parseInt($('s-low').value,10)||10);
+  S.theme=$('s-theme').value;S.bg=$('s-bg').checked;S.motion=$('s-motion').checked;S.spin=$('s-spin').checked;
+  const np=$('s-pin').value.trim();
+  if(np){if(!/^\d{4,6}$/.test(np)){toast('PIN must be 4 to 6 digits','warn');return}S.pinh=hp(np);unlocked=true}
+  persistS();applySettings();hero();cards();drawCart();closeM('set');toast('Settings saved');
+}
+function toggleTheme(){const o=['purple','light','black'];S.theme=o[(o.indexOf(S.theme)+1)%3];persistS();applySettings();toast('Theme: '+({purple:'Purple 3D',light:'Minimal light',black:'Pure black'}[S.theme]))}
+function setPalette(t){const k=t==='black'?{l:0x9a9a9a,m:0x555555,d:0x1a1a1a,r:0xbdbdbd,g:0xbdbdbd,k:0x0a0a0a}:{l:0x8f8fe0,m:0x5b4fc4,d:0x1a1733,r:0x9a9ae8,g:0x9a9ae8,k:0x1b1440};
+  [sm,dm].forEach(o=>{o.l.color.setHex(k.l);o.m.color.setHex(k.m);o.d.color.setHex(k.d)});sm.r.color.setHex(k.r);ring.material.color.setHex(k.g);disc.material.color.setHex(k.k)}
+function removePin(){S.pinh='';persistS();toast('Owner PIN removed')}
+function resetAll(){try{localStorage.removeItem(KEY);localStorage.removeItem(SKEY)}catch(e){}location.reload()}
+let FREE=1500,LOW=10,CUR={},lastOrder=null;const CP={HIRA10:{p:10,l:'10% off'},FIRST100:{f:100,min:999,l:'₹100 off orders above ₹999'}};let cpnv=null,ZONE={fee:49,ok:true},flt='all';
+function fm(p){return flt==='all'||(flt==='rx'?p.rx:flt==='low'?(p.stock>0&&p.stock<=LOW):p.cat===flt)}
+function setChip(f){flt=f;document.querySelectorAll('#chips button').forEach(x=>x.classList.toggle('on',x.dataset.f===f));cards()}
+document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>setChip(b.dataset.f));
+function clearF(){$('q').value='';$('sort').value='';$('instock').checked=false;setChip('all')}
+function applyCoupon(){const c=$('cpn').value.trim().toUpperCase();if(!c){cpnv=null}else if(CP[c]){cpnv=CP[c];toast('Coupon applied: '+CP[c].l)}else{cpnv=null;toast('Invalid coupon code','warn')}drawCart()}
+function checkPin(){const v=$('pin').value.trim(),m=$('pinmsg');
+  if(!/^[1-9]\d{5}$/.test(v)){m.textContent='Enter a valid 6-digit pincode.';return}
+  if(v.startsWith('440')){ZONE={fee:49,ok:true};m.textContent='✓ Delivery today within 2 hours · fee ₹49, free above '+inr(FREE)}
+  else if(v[0]==='4'){ZONE={fee:79,ok:true};m.textContent='✓ Delivery in 1–2 days · fee ₹79, free above '+inr(FREE)}
+  else{ZONE={fee:49,ok:false};m.textContent='Sorry, we don’t deliver to this pincode yet.'}
+  drawCart()}
+function st(s){return s>LOW?{c:'ok',t:'In stock ('+s+' units)',col:'#10b981'}:s>0?{c:'low',t:'Low stock: only '+s+' left',col:'#f59e0b'}:{c:'out',t:'Out of stock',col:'#f43f5e'}}
+
+function hero(){
+  const p=P[active],s=st(p.stock);
+  $('hcat').textContent=p.cn;$('htitle').textContent=p.name;$('hsub').textContent=p.sub;$('hprice').textContent=inr(p.price);$('hdesc').textContent=p.desc;
+  $('hrx').textContent=p.rx?'Prescription (Rx) required':'Over-the-counter';$('hrxnote').style.display=p.rx?'block':'none';$('sk-name').textContent=p.name;$('sk-price').textContent=inr(p.price);$('sk-add').disabled=p.stock<=0;
+  $('hbadge').className='badge '+s.c;$('hbtxt').textContent=s.t;
+  $('hfill').style.width=Math.min(100,Math.round(p.stock/p.max*100))+'%';$('hfill').style.background=s.col;
+  $('hunits').textContent=p.stock+' / '+p.max+' units';
+  const b=$('hadd');b.disabled=p.stock<=0;b.className='cta'+(p.stock>0&&p.stock<=LOW?' low':'');
+  b.textContent=p.stock>LOW?'Add to medical bag':p.stock>0?'Claim low stock ('+p.stock+' left)':'Sold out · restocking soon';
+  qty=Math.max(1,Math.min(qty,p.stock||1));$('hqty').textContent=qty;
+}
+function hq(n){const m=P[active].stock;if(!m)return;qty=Math.max(1,Math.min(qty+n,m));$('hqty').textContent=qty}
+function inspect(id){active=id;qty=1;hero();show3D(P[id].m);scrollTo({top:0,behavior:'smooth'})}
+function cards(){
+  ['syrups','tablets','general'].forEach(c=>$('g-'+c).innerHTML='');
+  const q=$('q').value.trim().toLowerCase(),so=$('sort').value,io=$('instock').checked;
+  const list=Object.entries(P).filter(([id,p])=>(!q||(p.name+' '+p.sub+' '+p.desc).toLowerCase().includes(q))&&(!io||p.stock>0)&&fm(p));
+  if(so==='lo')list.sort((a,b)=>a[1].price-b[1].price);if(so==='hi')list.sort((a,b)=>b[1].price-a[1].price);
+  list.forEach(([id,p])=>{
+    const s=st(p.stock),d=document.createElement('div');d.className='card pc';
+    d.innerHTML='<div><div class="row" style="justify-content:space-between"><span class="mute" style="color:var(--acc);font-weight:800;font-size:10px">'+(p.rx?'Rx PRESCRIPTION':'OTC')+'</span><span class="badge '+s.c+'" style="font-size:10px"><i></i>'+s.t+'</span></div><h3>'+p.name+'</h3><div class="mute">'+p.desc+'</div></div>'+
+    '<div class="foot"><div class="row" style="justify-content:space-between"><b style="font-size:22px">'+inr(p.price)+'</b><span class="mute">'+p.stock+' units on shelf</span></div><div class="two"><button class="btn" data-i="'+id+'">Inspect 3D</button><button class="btn pri" data-a="'+id+'" '+(p.stock?'':'disabled style="opacity:.4;cursor:not-allowed"')+'>'+(p.stock?'Add':'Sold out')+'</button></div><button class="btn" style="width:100%;margin-top:8px;background:transparent" data-q="'+id+'">QR code</button></div>';
+    d.querySelector('[data-i]').onclick=()=>inspect(id);d.querySelector('[data-a]').onclick=()=>add(id,1);d.querySelector('[data-q]').onclick=()=>showQR(id);
+    $('g-'+p.cat).appendChild(d);
+  });
+  ['syrups','tablets','general'].forEach(c=>{$(c).style.display=$('g-'+c).children.length?'':'none'});
+  $('empty').style.display=list.length?'none':'block';
+  save();
+}
+function add(id,n){
+  const p=P[id];if(p.stock<=0)return;
+  const ex=cart.find(c=>c.id===id);
+  if((ex?ex.qty:0)+n>p.stock){toast('Only '+p.stock+' units available on the shelf.','warn');return}
+  if(ex)ex.qty+=n;else cart.push({id,qty:n});
+  toast('Added to bag: '+p.name);cartOpen(true);
+}
+function cartOpen(o){$('drawer').classList.toggle('open',o);if(o)drawCart()}
+function drawCart(){
+  cart=cart.map(c=>({id:c.id,qty:Math.min(c.qty,P[c.id].stock)})).filter(c=>c.qty>0);
+  let t=0,rx=false;$('items').innerHTML=cart.length?'':'<p class="mute" style="text-align:center;padding:30px 0">Your bag is empty</p>';
+  cart.forEach(c=>{const p=P[c.id];t+=p.price*c.qty;if(p.rx)rx=true;
+    const d=document.createElement('div');d.className='item';
+    d.innerHTML='<div><b>'+p.name+'</b><div class="mute">'+inr(p.price)+' each</div></div><div class="row" style="flex-wrap:nowrap;gap:8px"><div class="qty"><button aria-label="Decrease quantity">−</button><span>'+c.qty+'</span><button aria-label="Increase quantity">+</button></div><b style="color:var(--acc);min-width:64px;text-align:right">'+inr(p.price*c.qty)+'</b><button class="btn" style="padding:4px 8px" aria-label="Remove item">✕</button></div>';
+    const bs=d.querySelectorAll('button');
+    bs[0].onclick=()=>{c.qty--;if(c.qty<=0)cart=cart.filter(x=>x.id!==c.id);drawCart()};
+    bs[1].onclick=()=>{if(c.qty<p.stock){c.qty++;drawCart()}else toast('Only '+p.stock+' in stock','warn')};
+    bs[2].onclick=()=>{cart=cart.filter(x=>x.id!==c.id);drawCart()};$('items').appendChild(d)});
+  const dc=cpnv?(cpnv.p?Math.round(t*cpnv.p)/100:(t>=cpnv.min?cpnv.f:0)):0,sub2=Math.max(0,t-dc),fee=!t?0:sub2>=FREE?0:ZONE.fee,tot=sub2+fee;
+  CUR={t,dc,fee,tot};$('total').textContent=inr(tot);
+  $('fdtxt').textContent=!t?'Free delivery on orders above '+inr(FREE):sub2>=FREE?'🎉 You’ve unlocked free delivery':'Add '+inr(FREE-sub2)+' more for free delivery';
+  $('fdbar').style.width=Math.min(100,Math.round(sub2/FREE*100))+'%';
+  $('sum').textContent=t?'Items '+inr(t)+(dc?' · Coupon −'+inr(dc):'')+' · Delivery '+(fee?inr(fee):'Free'):'';$('rxbox').style.display=rx?'block':'none';$('place').disabled=!cart.length;
+  $('cnt').textContent=cart.reduce((a,c)=>a+c.qty,0);
+  save();
+}
+function placeOrder(){
+  const n=$('oname').value.trim(),p=$('ophone').value.trim(),a=$('oaddr').value.trim();
+  if(!n||!p||!a){toast('Please complete name, phone, and delivery address.','warn');return}
+  if(cart.some(c=>P[c.id].rx)&&!$('rxfile').files.length){toast('Please upload your prescription for Rx medicines.','warn');return}
+  if(ZONE.ok===false){toast('We don’t deliver to that pincode yet.','warn');return}
+  const tot=$('total').textContent;lastOrder=Object.assign({id:'',date:new Date(),name:n,phone:p,addr:a,items:cart.map(c=>({n:P[c.id].name,q:c.qty,p:P[c.id].price}))},CUR);cart.forEach(c=>P[c.id].stock-=c.qty);
+  $('oid').textContent='HIRA-'+Math.floor(100000+Math.random()*900000);lastOrder.id=$('oid').textContent;$('rname').textContent=n;$('ramt').textContent=tot;
+  cart=[];drawCart();cartOpen(false);hero();cards();$('rec').classList.add('open');
+}
+function closeM(id){$(id).classList.remove('open')}
+function showInvoice(){const o=lastOrder;if(!o)return;closeM('rec');const r=Math.max(0,+S.gst||0),gt=o.tot-o.tot/(1+r/100),b=$('inv-body');b.innerHTML='';
+  const h=(t,x,c)=>{const e=document.createElement(t);e.textContent=x;if(c)e.style.cssText=c;b.appendChild(e);return e};
+  h('h2',S.name+' · Invoice','margin:0');h('div',[S.addr,S.phone,S.lic&&'Drug licence: '+S.lic,S.gstin&&'GSTIN: '+S.gstin].filter(Boolean).join(' · '),'font-size:12px;color:#555');
+  h('div','Invoice '+o.id+' · '+o.date.toLocaleString('en-IN'),'margin-top:10px;font-size:13px');h('div','Bill to: '+o.name+', '+o.phone+', '+o.addr,'font-size:13px;margin-bottom:10px');
+  const t=document.createElement('table');t.style.cssText='width:100%;border-collapse:collapse;font-size:13px';
+  const tr=(a,bd)=>{const w=document.createElement('tr');a.forEach((x,i)=>{const c=document.createElement('td');c.textContent=x;c.style.cssText='padding:6px 4px;border-bottom:1px solid #ddd;'+(i?'text-align:right;':'')+(bd?'font-weight:700':'');w.appendChild(c)});t.appendChild(w)};
+  tr(['Item','Qty','Rate','Amount'],1);o.items.forEach(i=>tr([i.n,i.q,inr(i.p),inr(i.p*i.q)]));
+  tr(['Items total','','',inr(o.t)]);if(o.dc)tr(['Coupon discount','','','−'+inr(o.dc)]);tr(['Delivery','','',o.fee?inr(o.fee):'Free']);tr(['Total payable','','',inr(o.tot)],1);b.appendChild(t);
+  const f=x=>inr(Number(x.toFixed(2)));
+  h('div','GST @ '+r+'% is included in prices: taxable value '+f(o.tot-gt)+', CGST '+f(gt/2)+', SGST '+f(gt/2),'font-size:12px;color:#444;margin-top:10px');
+  h('div','Demo order: no payment was taken.'+(S.gstin?'':' Add your GSTIN in Settings before using this as a tax invoice.'),'font-size:12px;color:#b45309;margin-top:4px');
+  $('invoice').classList.add('open')}
+const BASE='https://claude.ai/artifact/PNKVTizbakVN1iCdaRXjBT';
+function qrInto(el,id,size){el.innerHTML='';const url=BASE+'#'+id;
+  if(typeof QRCode==='undefined'){el.textContent=url;return}
+  new QRCode(el,{text:url,width:size,height:size,colorDark:'#12101f',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}
+function showQR(id){const p=P[id];$('qr-name').textContent=p.name;$('qr-price').textContent=inr(p.price)+(p.rx?' · Rx required':'');qrInto($('qr-one'),id,200);$('qr').classList.add('open')}
+function showAllQR(){closeM('qr');const g=$('qr-grid');g.innerHTML='';
+  Object.entries(P).forEach(([id,p])=>{const d=document.createElement('div');d.className='qi';const q=document.createElement('div');q.style.display='inline-block';const n=document.createElement('div');n.className='qn';n.textContent=p.name;const pr=document.createElement('div');pr.className='qp';pr.textContent=inr(p.price);d.append(q,n,pr);g.appendChild(d);qrInto(q,id,120)});
+  $('qrall').classList.add('open')}
+function openFromHash(){const id=decodeURIComponent(location.hash.slice(1));if(id&&P[id]){active=id;qty=1;hero();show3D(P[id].m);setTimeout(()=>$('inspector').scrollIntoView({behavior:'smooth'}),150)}}
+addEventListener('hashchange',openFromHash);
+function addMedicine(){
+  const g=id=>$(id).value.replace(/[<>]/g,'').trim(),name=g('nm-name'),price=parseFloat($('nm-price').value),max=parseInt($('nm-max').value,10);let stock=parseInt($('nm-stock').value,10);
+  if(!name||isNaN(price)||price<0||isNaN(max)||max<1){toast('Enter a name, price and max stock.','warn');return}
+  if(isNaN(stock)||stock<0)stock=0;stock=Math.min(stock,max);
+  const cat=$('nm-cat').value,k='custom-'+Date.now();
+  P[k]={cat,cn:{syrups:'Syrups & Liquids',tablets:'Tablets & Capsules',general:'Creams, Oils & Powders'}[cat],name,sub:g('nm-sub')||'Added by pharmacist',price:Math.round(price*100)/100,stock,max,rx:$('nm-rx').checked,m:$('nm-model').value,desc:g('nm-desc')||'No description added yet.',custom:true};
+  ['nm-name','nm-sub','nm-price','nm-stock','nm-max','nm-desc'].forEach(i=>$(i).value='');$('nm-rx').checked=false;$('newform').classList.remove('open');
+  hero();cards();save();toast('Added: '+name);openInv();
+}
+function removeMed(k){
+  const n=P[k].name;delete P[k];cart=cart.filter(c=>c.id!==k);
+  if(active===k){active=Object.keys(P)[0];qty=1;show3D(P[active].m)}
+  hero();cards();drawCart();toast('Removed: '+n);openInv();
+}
+function restock(k){if(!gate(()=>restock(k)))return;const p=P[k];p.stock=p.max;hero();cards();drawCart();toast('Restocked: '+p.name+' ('+p.max+' units)');if($('inv').classList.contains('open'))openInv()}
+function restockAll(){if(!gate(restockAll))return;Object.values(P).forEach(p=>p.stock=p.max);hero();cards();drawCart();toast('All medicines restocked to full');openInv()}
+function openInv(){if(!gate(openInv))return;
+  const l=$('invlist');l.innerHTML='';
+  Object.values(P).forEach(p=>{const d=document.createElement('div');d.className='item';
+    d.innerHTML='<div><b>'+p.name+'</b><div class="mute">Stock: '+p.stock+' / '+p.max+'</div></div><div class="row"><input class="n" type="number" min="0" max="'+p.max+'" value="'+p.stock+'"><button class="btn pri">Update</button><button class="btn" aria-label="Restock to full">↻ Full</button>'+(p.custom?'<button class="btn" aria-label="Delete medicine" title="Delete">✕</button>':'')+'</div>';
+    d.querySelector('button').onclick=()=>{const v=parseInt(d.querySelector('input').value,10);if(isNaN(v)||v<0)return;p.stock=v;hero();cards();drawCart();openInv()};
+    d.querySelectorAll('button')[1].onclick=()=>restock(Object.keys(P).find(x=>P[x]===p));
+    if(p.custom)d.querySelectorAll('button')[2].onclick=()=>removeMed(Object.keys(P).find(x=>P[x]===p));
+    l.appendChild(d)});
+  $('inv').classList.add('open');
+}
+
+// ---- 3D ----
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c},o||{}));
+const cyl=(a,b,h,m,y)=>{const x=new THREE.Mesh(new THREE.CylinderGeometry(a,b,h,40),m);x.position.y=y||0;return x};
+const amber=M(0x78350f,{roughness:.15,transparent:true,opacity:.92});
+const B={
+ syrup(){const g=new THREE.Group();g.add(cyl(1.05,1.05,2.7,amber),cyl(.5,.6,.6,amber,1.6),cyl(.65,.65,.5,M(0xf8fafc),1.95),cyl(1.06,1.06,1.6,M(0x18181b),-.1));return g},
+ capsule(){const g=new THREE.Group(),c=M(0x06b6d4,{roughness:.1}),h=new THREE.SphereGeometry(1.1,32,16,0,Math.PI*2,0,Math.PI/2);
+  const t=new THREE.Mesh(h,c);t.position.y=.7;const b=new THREE.Mesh(h,M(0xe4e4e7,{roughness:.1}));b.position.y=-.7;b.rotation.x=Math.PI;g.add(t,cyl(1.1,1.1,1.4,c),b);g.rotation.z=Math.PI/4;return g},
+ cream(){const g=new THREE.Group();g.add(cyl(.85,.2,2.8,M(0xd4d4d8,{metalness:.5,roughness:.2})),cyl(.4,.4,.5,M(0x06b6d4),-1.6));g.rotation.z=-.4;return g},
+ oil(){const g=new THREE.Group();g.add(cyl(.9,.9,2.4,M(0xd97706,{roughness:.1,transparent:true,opacity:.85})),cyl(.35,.45,.8,M(0x18181b),1.5));
+  const p=new THREE.Mesh(new THREE.SphereGeometry(.3,16,16),M(0x06b6d4));p.position.y=2;g.add(p);return g},
+ powder(){const g=new THREE.Group();g.add(cyl(1.2,1.2,2.5,M(0x27272a,{roughness:.2})),cyl(1.22,1.22,.4,M(0x06b6d4),1.4));return g},
+ pack(){const g=new THREE.Group();g.add(new THREE.Mesh(new THREE.BoxGeometry(2.4,3.2,.08),M(0xa1a1aa,{metalness:.8,roughness:.2})));
+  for(let x=-.6;x<=.7;x+=1.2)for(let y=-1;y<=1.1;y+=1){const p=new THREE.Mesh(new THREE.SphereGeometry(.3,16,16),M(0xffffff));p.scale.z=.5;p.position.set(x,y,.1);g.add(p)}
+  g.rotation.y=-.4;return g}
+};
+const box=$('view'),scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,1,.1,100);cam.position.set(0,0,7.5);
+const ren=new THREE.WebGLRenderer({antialias:true,alpha:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));box.appendChild(ren.domElement);
+const ctl=new THREE.OrbitControls(cam,ren.domElement);ctl.enableDamping=true;ctl.dampingFactor=.05;
+scene.add(new THREE.AmbientLight(0xffffff,.7));const dl=new THREE.DirectionalLight(0xffffff,1.2);dl.position.set(5,10,7);scene.add(dl);
+const rim=new THREE.PointLight(0x8b8bff,2,10);rim.position.set(-3,-2,2);scene.add(rim);
+let obj=B.syrup(),grow=null;scene.add(obj);
+const decor=new THREE.Group();scene.add(decor);
+const dm={l:M(0x8f8fe0,{roughness:.35}),m:M(0x5b4fc4,{roughness:.3}),d:M(0x1a1733,{roughness:.5})};
+[[-3.2,2,-3,'l',1.1],[3.4,2.4,-4,'d',1.2],[3.6,-1.8,-2,'m',.9],[-3.4,-2,-2,'l',.8],[0,3,-5,'d',.8]].forEach(([x,y,z,k,s],i)=>{
+ const o=new THREE.Mesh(i%2?new THREE.BoxGeometry(1,1,1):new THREE.SphereGeometry(.6,24,16),dm[k]);o.position.set(x,y,z);o.scale.setScalar(s);o.userData.s=.3+i*.08;decor.add(o)});
+const ring=new THREE.Mesh(new THREE.TorusGeometry(2.6,.28,20,64),M(0x9a9ae8,{roughness:.4,transparent:true,opacity:.75}));ring.rotation.x=1.1;ring.position.z=-2;decor.add(ring);
+const disc=new THREE.Mesh(new THREE.CylinderGeometry(2.8,2.8,.15,64),M(0x1b1440,{roughness:.6}));disc.position.set(0,-2.6,-1);decor.add(disc);
+function show3D(m){scene.remove(obj);obj=B[m]();obj.scale.setScalar(.1);scene.add(obj);grow=.1}
+function size(){const w=box.clientWidth,h=box.clientHeight;ren.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+
+// floating background
+const bgR=new THREE.WebGLRenderer({canvas:$('bg'),alpha:true,antialias:true});bgR.setPixelRatio(Math.min(devicePixelRatio,1.5));
+const bgS=new THREE.Scene(),bgC=new THREE.PerspectiveCamera(50,1,.1,100);bgC.position.z=25;
+bgS.add(new THREE.AmbientLight(0xffffff,.4));const bl=new THREE.DirectionalLight(0x8b8bff,1.4);bl.position.set(10,20,15);bgS.add(bl);
+const hh=new THREE.SphereGeometry(.5,16,8,0,Math.PI*2,0,Math.PI/2),hm=new THREE.CylinderGeometry(.5,.5,.8,16),tg=new THREE.CylinderGeometry(.65,.65,.28,24),sg=new THREE.SphereGeometry(.6,20,16);
+const mc=M(0x06b6d4,{roughness:.1}),mw=M(0xd4d4d8,{roughness:.3}),mr=M(0xbe123c,{roughness:.2}),mg=M(0xf59e0b,{transparent:true,opacity:.7,roughness:.1});
+function pill(i){
+  if(i%4<2){const g=new THREE.Group(),m=i%4?mr:mc,t=new THREE.Mesh(hh,m);t.position.y=.4;const b=new THREE.Mesh(hh,mw);b.position.y=-.4;b.rotation.x=Math.PI;g.add(t,new THREE.Mesh(hm,m),b);return g}
+  if(i%4===2)return new THREE.Mesh(tg,mw);const s=new THREE.Mesh(sg,mg);s.scale.set(1,1.35,1);return s}
+const sm={l:M(0x8f8fe0,{roughness:.35}),m:M(0x5b4fc4,{roughness:.3}),d:M(0x1a1733,{roughness:.5}),r:M(0x9a9ae8,{roughness:.4})};
+const ringG=new THREE.TorusGeometry(.7,.22,16,40),cubeG=new THREE.BoxGeometry(1,1,1),ballG=new THREE.SphereGeometry(.6,24,16),discG=new THREE.CylinderGeometry(1.2,1.2,.15,40);
+function shape(i){const k=i%6;
+  if(k===0)return new THREE.Mesh(cubeG,sm.l);if(k===1)return new THREE.Mesh(cubeG,sm.d);
+  if(k===2)return new THREE.Mesh(ballG,sm.m);if(k===3)return new THREE.Mesh(ringG,sm.r);
+  if(k===4)return new THREE.Mesh(discG,sm.l);return new THREE.Mesh(ballG,sm.d)}
+const pills=[];
+for(let i=0;i<(innerWidth<700?12:20);i++){const m=shape(i);m.position.set((Math.random()-.5)*45,(Math.random()-.5)*35,(Math.random()-.5)*20-5);m.scale.multiplyScalar(.5+Math.random()*.6);m.rotation.set(Math.random()*3,Math.random()*3,0);bgS.add(m);
+  pills.push({m,x:m.position.x,y:m.position.y,sp:.4+Math.random()*.7,a:.7+Math.random()*1.2,rx:(Math.random()-.5)*.015,ry:(Math.random()-.5)*.015,o:Math.random()*6.28})}
+let mx=0,my=0;addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*3;my=(e.clientY/innerHeight-.5)*-3});
+function sizeAll(){size();bgR.setSize(innerWidth,innerHeight);bgC.aspect=innerWidth/innerHeight;bgC.updateProjectionMatrix()}
+addEventListener('resize',sizeAll);
+const clock=new THREE.Clock();
+(function loop(){requestAnimationFrame(loop);const t=clock.getElapsedTime();
+  if(!RM)pills.forEach(p=>{p.m.position.y=p.y+Math.sin(t*.4*p.sp+p.o)*p.a;p.m.position.x=p.x+Math.cos(t*.3*p.sp+p.o)*p.a*.4;p.m.rotation.x+=p.rx*.4;p.m.rotation.y+=p.ry*.4});
+  bgC.position.x+=(mx-bgC.position.x)*.04;bgC.position.y+=(my-bgC.position.y)*.04;if(S.bg)bgR.render(bgS,bgC);
+  if(grow!==null){grow=Math.min(1,grow+.08);obj.scale.setScalar(grow);if(grow>=1)grow=null}
+  if(S.spin)obj.rotation.y+=.005;ctl.update();
+  if(!RM){decor.children.forEach(o=>{if(o.userData.s){o.rotation.x+=.004;o.rotation.y+=.006;o.position.y+=Math.sin(t*o.userData.s+o.position.x)*.003}});ring.rotation.z+=.003}ren.render(scene,cam)})();
+sizeAll();applySettings();load();hero();cards();drawCart();openFromHash();$('boot').classList.add('done');
+</script>
+</body>
+</html>
